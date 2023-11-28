@@ -45,12 +45,9 @@ const createPostValidation = [
     check('content', 'Content is required').not().isEmpty()
 
 ]
+const getLike = [
+    check('postId', 'Post id is required').not().isEmpty(),
+]
 
 
-// module.exports = {
-//     createUser,
-//     createPostValidation,
-//     createLike,
-//     createComment
-// }
-export  {createUser,createComment,createLike,createPostValidation}
+export  {createUser,createComment,createLike,createPostValidation,getLike}

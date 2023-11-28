@@ -2,10 +2,7 @@
 import {
     DataTypes
 } from 'sequelize';
-import sequelize from '../../config/db.js'; // Make sure to import your sequelize instance
-// import {User} from '../models/User.js';
-// import {Post} from '../models/Post.js';
-// import {Post,User} from '../models/index.js';
+import sequelize from '../../config/db.js';
 
 const Like = sequelize.define('Like', {
     postId: {
@@ -17,22 +14,7 @@ const Like = sequelize.define('Like', {
         allowNull: false,
     },
 });
-
-const likePosts = (models) => {
-    const {
-        Post
-    } = models;
-    Like.belongsTo(Post);
-};
-const userLikes = (models) => {
-    const {
-        User
-    } = models;
-    Like.belongsTo(User);
-};
-
-export {
-    Like,
-    likePosts,
-    userLikes
-};
+// export {
+//     Like
+// };
+export default Like;

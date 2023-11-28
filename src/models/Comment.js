@@ -3,7 +3,6 @@ import {
     DataTypes
 } from 'sequelize';
 import sequelize from '../../config/db.js';
-import {Post} from './Post.js';
 
 const Comment = sequelize.define('Comment', {
     postId: {
@@ -19,19 +18,8 @@ const Comment = sequelize.define('Comment', {
         allowNull: false,
     },
 });
-const commentPosts = (models) => {
-    const { Post } = models;
-    Comment.belongsTo(Post, { as: 'commentPosts' });
-};
 
-export {
-    Comment,
-    commentPosts
-};
-
-// export default (models) => {
-//     const { Post } = models;
-//     Comment.belongsTo(Post, { as: 'commentPosts' });
-
-//     return Comment;
+// export {
+//     Comment
 // };
+export default Comment;

@@ -1,4 +1,3 @@
-import {User} from '../models/User.js';
 import jwt from 'jsonwebtoken';
 const blacklist = new Set();
 
@@ -13,8 +12,6 @@ const userAuth = (req, res, next) => {
             message: 'Do not have permission for this!'
         });
     }
-    //  return res.sendStatus(403);
-    // Bearer token
     const token = authHeader.split(" ")[1];
     jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
         // Add token to blacklist
@@ -30,9 +27,4 @@ const userAuth = (req, res, next) => {
         next();
     });
 };
-
-
-// module.exports = {
-//     userAuth
-// }
 export default userAuth;

@@ -11,9 +11,9 @@ const sequelize = new Sequelize(config.development);
 //     host: 'localhost',
 //     dialect: 'mysql',
 // });
+
 sequelize.sync().then(() => {
     console.log('Database synchronized.');
-    // ... start the server or perform other actions
 });
 
 // Test the connection

@@ -1,5 +1,5 @@
 import express from 'express';
-import {User} from '../models/User.js';
+import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import {
     generateAuthToken
@@ -7,10 +7,6 @@ import {
 import {
     validationResult
 } from 'express-validator';
-import {
-    logingUser
-} from '../utils/logingUser.js';
-
 /**
  * @description Create New User
  * @type POST
@@ -29,7 +25,6 @@ const registerUser = async (req, res) => {
             password
         } = req.body;
         //validation
-        // console.log(email); return false;
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {

@@ -1,7 +1,6 @@
 // app.js
 import express from 'express';
-import sequelize from './config/db.js';
-import {User} from './src/models/User.js';
+// import sequelize from './config/db.js';
 import cors from 'cors';
 
 const app = express();
@@ -29,7 +28,6 @@ app.use("/api/users", users);
 //Post route 
 import posts from './src/routes/postRoutes.js';
 app.use('/api/posts', posts);
-// sequelize.sync({ alter: true }) // Sync models with the database
 try {
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);

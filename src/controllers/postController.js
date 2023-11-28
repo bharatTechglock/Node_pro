@@ -1,9 +1,10 @@
-import { validationResult } from 'express-validator';
-import { logingUser } from '../utils/logingUser.js';
-import {Post,postComments} from '../models/Post.js';
-import {Comment} from '../models/Comment.js';
-import {Like} from '../models/Like.js';
-
+import {
+    validationResult
+} from 'express-validator';
+import {
+    logingUser
+} from '../utils/logingUser.js';
+import { User, Post,Comment,Like } from '../models/index.js';
 /**
  * @description Get All Posts with likes and comments for login user
  * @type GET
@@ -14,39 +15,38 @@ import {Like} from '../models/Like.js';
  */
 const getAllPosts = async (req, res) => {
     try {
+        //Get auth user details
         const authUser = logingUser(req);
-        // console.log(authUser); return false;
-        let allPosts = await Post.findAll({
+        // Fetch all posts with associated comments and likes
+        const allPosts = await Post.findAll({
             where: {
                 userId: authUser.id
             },
-            include: [
-                {
-                    model: Comment,
-                    as: 'commentPosts',
-                },
-                {
-                    model: Like,
-                    as: 'likePosts',
-                },
-            ],
+            include: [{
+                model: Comment,
+                as: 'postComments',
+            },
+            {
+                model: Like,
+                as: 'postLikes',
+            }],
         });
-        // console.log(allPosts); return false; 
 
         return res.status(200).json({
             success: true,
             count: allPosts.length,
             data: allPosts,
-            message: "Get all posts for this user successfully.!"
+            message: 'Get all posts for this user successfully!'
         });
     } catch (error) {
+        console.error(error.stack || error.message);
         return res.status(500).json({
             success: false,
             error: error,
             message: error.message
         });
     }
-}
+};
 
 /**
  * @description Create New Post
@@ -56,10 +56,9 @@ const getAllPosts = async (req, res) => {
  * @param {*} res
  * @returns JSON
  */
-const createPost = async (req, res, next) => {
+const createPost = async (req, res) => {
     try {
         const authUser = logingUser(req);
-        // console.log(authUser); return false;
         //validation
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -67,7 +66,6 @@ const createPost = async (req, res, next) => {
                 errors: errors.array()
             });
         }
-        // console.log(req.body); return false;
         const newPost = {
             title: req.body.title,
             content: req.body.content,
@@ -96,7 +94,7 @@ const createPost = async (req, res, next) => {
  * @param {*} res
  * @returns JSON
  */
-const commentOnPost = async (req, res, next) => {
+const commentOnPost = async (req, res) => {
     try {
         const authUser = logingUser(req);
         //validation
@@ -106,8 +104,7 @@ const commentOnPost = async (req, res, next) => {
                 errors: errors.array()
             });
         }
-        // console.log(req.body); return false;
-        if(req.body.postId){
+        if (req.body.postId) {
             const PostExits = await Post.findByPk(req.body.postId);
             if (!PostExits) {
                 return res.status(404).json({
@@ -142,9 +139,9 @@ const commentOnPost = async (req, res, next) => {
  * @param {*} res
  * @returns JSON
  */
-const likeOnPost = async (req, res, next) => {
+const likeOnPost = async (req, res) => {
     try {
-        const authUser =logingUser(req);
+        const authUser = logingUser(req);
         //validation
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -193,7 +190,7 @@ const likeOnPost = async (req, res, next) => {
  * @param {*} res
  * @returns JSON
  */
-const getLikesOnPost = async (req, res, next) => {
+const getLikesOnPost = async (req, res) => {
     try {
         const authUser = logingUser(req);
         const postId = req.body.postId;
@@ -206,6 +203,12 @@ const getLikesOnPost = async (req, res, next) => {
 
         let likes;
         if (postId) {
+            const PostExits = await Post.findByPk(req.body.postId);
+            if (!PostExits) {
+                return res.status(404).json({
+                    error: 'Post not found!'
+                });
+            }
             likes = await Like.findAll({
                 where: {
                     PostId: postId
@@ -236,7 +239,7 @@ const getLikesOnPost = async (req, res, next) => {
  * @param {*} res
  * @returns JSON
  */
-const getAllLikesOnPost = async (req, res, next) => {
+const getAllLikesOnPost = async (req, res) => {
     try {
         const authUser = logingUser(req);
         const postId = req.body.postId;
@@ -280,11 +283,119 @@ const getAllLikesOnPost = async (req, res, next) => {
     }
 }
 
+const likeOnPostCheck = async (req, res) => {
+    try {
+        const authUser = logingUser(req);
+
+        // console.log(req.body); return false;
+        if (req.body.postId) {
+            const PostExits = await Post.findByPk(req.body.postId);
+            if (!PostExits) {
+                return res.status(404).json({
+                    error: 'Post not found'
+                });
+            }
+
+            const getUserLike = await Like.count({
+                where: {
+                    userId: authUser.id,
+                    postId: req.body.postId
+                }
+            }).then(count => {
+                return (count > 0) ? true : false
+            });
+            // console.log(getUserLike);
+            // return false;
+            if (!getUserLike) {
+                return res.status(404).json({
+                    // error: 'Post not found'
+                    success: false,
+                    data: getUserLike,
+                    message: 'You not like on this post.!'
+                });
+            } else {
+                // console.log(createLike); return false;
+                return res.status(201).json({
+                    success: true,
+                    data: getUserLike,
+                    message: 'You already like on this post.!'
+                })
+            }
+
+        }
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error,
+            message: error.message
+        });
+    }
+}
+
+const totalPostComments = async (req, res) => {
+    try {
+        const authUser = logingUser(req);
+
+        // console.log(req.body); return false;
+        //validation
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array()
+            });
+        }
+        const {
+            postId
+        } = req.body;
+        if (postId) {
+            const PostExits = await Post.findByPk(postId);
+            if (!PostExits) {
+                return res.status(404).json({
+                    error: 'Post not found'
+                });
+            }
+        }
+        const getCommentOnPosts = await Comment.findAll({
+            where: {
+                postId: postId
+            },
+            order: [['createdAt', 'DESC']], // Order by creation date in descending order
+            limit: 3
+        });
+        // console.log(getCommentOnPosts); return false;
+
+        if (getCommentOnPosts.length > 0) {
+            return res.status(404).json({
+                // error: 'Post not found'
+                success: true,
+                totalPostComments: getCommentOnPosts.length,
+                data: getCommentOnPosts,
+                message: 'fetch comments on this post!'
+            });
+        } else {
+            // console.log(createLike); return false;
+            return res.status(201).json({
+                success: false,
+                data: getCommentOnPosts,
+                message: 'No any comments found.!'
+            })
+        }
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            error: error,
+            message: error.message
+        });
+    }
+}
+
 export {
     getAllPosts,
     createPost,
     commentOnPost,
     likeOnPost,
     getLikesOnPost,
-    getAllLikesOnPost
+    getAllLikesOnPost,
+    totalPostComments,
+    likeOnPostCheck
 };
