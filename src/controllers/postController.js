@@ -345,11 +345,9 @@ const postController = {
      * @param {*} res 
      * @returns 
      */
-    totalPostComments: async (req, res) => {
+    getPostWithComments: async (req, res) => {
         try {
             const authUser = authenticateUser(req);
-
-            // console.log(req.body); return false;
             //validation
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -374,21 +372,18 @@ const postController = {
                 },
                 order: [
                     ['createdAt', 'DESC']
-                ], // Order by creation date in descending order
+                ], 
                 limit: 3
             });
-            // console.log(getCommentOnPosts); return false;
 
             if (getCommentOnPosts.length > 0) {
                 return res.status(404).json({
-                    // error: 'Post not found'
                     success: true,
                     totalPostComments: getCommentOnPosts.length,
                     data: getCommentOnPosts,
                     message: 'fetch comments on this post!'
                 });
             } else {
-                // console.log(createLike); return false;
                 return res.status(201).json({
                     success: false,
                     data: getCommentOnPosts,
@@ -425,6 +420,13 @@ const postController = {
                 });
             }
             const postId = req.body.postId;
+
+            const PostExits = await Post.findByPk(postId);
+            if (!PostExits) {
+                return res.status(404).json({
+                    error: 'Post not found'
+                });
+            }
 
             const like = await Like.findOne({
                 where: {

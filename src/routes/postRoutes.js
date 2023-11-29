@@ -18,7 +18,7 @@ router.post('/like',userAuth,createLike, postController.likeOnPost);
 router.get('/getLike',userAuth,postController.getLikesOnPost);
 router.get('/getAllLikes',userAuth, postController.getAllLikesOnPost);
 router.get('/getUserPostLikeOrNot',userAuth,postController.likeOnPostCheck);
-router.get('/get_total_comment_this_postId',getLike,userAuth,postController.totalPostComments);
+router.get('/getPostWithComments',getLike,userAuth,postController.getPostWithComments);
 router.get('/authUserPostLike',getLike,userAuth,postController.authUserPostLike);
 
 export default router;
