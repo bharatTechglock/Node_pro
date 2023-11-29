@@ -2,7 +2,7 @@
 import {
     DataTypes
 } from 'sequelize';
-import sequelize from '../../config/db.js';
+import {sequelize} from '../../config/db.js';
 
 const Post = sequelize.define('Post', {
     // Define Post attributes

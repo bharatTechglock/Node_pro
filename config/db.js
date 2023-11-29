@@ -2,30 +2,34 @@
 import {
     Sequelize
 } from "sequelize";
-import config from './config.js';
 // import dbCreate from "./dbCreate.js";
 
-const sequelize = new Sequelize(config.development);
+// const sequelize = new Sequelize(config.development);
 
-// const sequelize = new Sequelize('Node_Pro_Test', 'root', '', {
-//     host: 'localhost',
-//     dialect: 'mysql',
-// });
-
-sequelize.sync().then(() => {
-    console.log('Database synchronized.');
+const sequelize = new Sequelize('Node_Pro_Test', 'root', '', {
+    host: 'localhost',
+    dialect: 'mysql',
+    pool: {
+        max: 5,
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+    }
 });
 
-// Test the connection
-try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-    // sequelize.sync({
-    //     force: true
-    // });
 
-} catch (error) {
-    console.error('Unable to connect to the database:', error.message);
+// Establish the connection only once
+async function testConnection() {
+    try {
+        await sequelize.authenticate();
+        console.log('Connection has been established successfully.');
+    } catch (error) {
+        console.error('Unable to connect to the database:', error);
+    }
 }
 
-export default sequelize;
+// console.log(testConnection());
+export {
+    sequelize,
+    testConnection
+};

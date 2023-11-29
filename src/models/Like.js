@@ -2,7 +2,7 @@
 import {
     DataTypes
 } from 'sequelize';
-import sequelize from '../../config/db.js';
+import {sequelize} from '../../config/db.js';
 
 const Like = sequelize.define('Like', {
     postId: {
@@ -13,8 +13,13 @@ const Like = sequelize.define('Like', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    liked: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+    },
 });
 // export {
 //     Like
 // };
+// Like.sync({ alter: true })
 export default Like;

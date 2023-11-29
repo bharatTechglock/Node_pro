@@ -1,8 +1,7 @@
 // app.js
 import express from 'express';
-// import sequelize from './config/db.js';
+import { testConnection }  from './config/db.js';
 import cors from 'cors';
-
 const app = express();
 const PORT = 7500;
 
@@ -15,6 +14,8 @@ app.use(express.json());
 app.use(express.urlencoded({
     extended: true
 }));
+// Test the database connection
+testConnection();
 app.get("/", (req, res) => {
     res.json({
         message: "Welcome to post like and comment's application."

@@ -149,36 +149,58 @@ const postController = {
     likeOnPost: async (req, res) => {
         try {
             const authUser = authenticateUser(req);
-            //validation
+
+            // Validation
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 return res.status(400).json({
                     errors: errors.array()
                 });
             }
-            // console.log(req.body); return false;
-            if (req.body.postId) {
-                const PostExits = await Post.findByPk(req.body.postId);
-                if (!PostExits) {
+            const postId = req.body.postId;
+            if (postId) {
+                const postExists = await Post.findByPk(postId);
+                if (!postExists) {
                     return res.status(404).json({
                         error: 'Post not found'
                     });
                 }
-                const createLike = await Like.findOrCreate({
+                // Check if the user has already liked the post
+                const existingLike = await Like.findOne({
                     where: {
                         userId: authUser.id,
-                        postId: req.body.postId
-                    },
-                    defaults: {
-                        userId: authUser.id,
-                        postId: req.body.postId
+                        postId: postId
                     }
                 });
-                return res.status(201).json({
-                    success: true,
-                    data: createLike,
-                    message: 'New like on this post.!'
-                })
+
+                if (!existingLike) {
+                    // User has not liked the post, create a new like
+                    const createLike = await Like.create({
+                        userId: authUser.id,
+                        postId: postId,
+                        liked: true // You can use 1 for like and 0 for dislike
+                    });
+                    return res.status(201).json({
+                        success: true,
+                        data: createLike,
+                        message: 'New like on this post!'
+                    });
+                } else {
+                    // User has already liked the post, update the like status
+                    const updatedLike = await existingLike.update({
+                        liked: existingLike.liked === true ? false : true // Toggle like/dislike
+                    });
+
+                    let message = 'You like this post!';
+                    if (!updatedLike.liked) {
+                        message = 'You dislike this post!';
+                    }
+                    return res.status(200).json({
+                        success: true,
+                        data: updatedLike.liked,
+                        message: message
+                    });
+                }
             }
         } catch (error) {
             return res.status(500).json({
@@ -372,7 +394,7 @@ const postController = {
                 },
                 order: [
                     ['createdAt', 'DESC']
-                ], 
+                ],
                 limit: 3
             });
 
@@ -407,6 +429,7 @@ const postController = {
     authUserPostLike: async (req, res) => {
         try {
             const authUser = authenticateUser(req);
+            // console.log(authUser); return false;
 
             if (!authUser) {
                 return res.status(401).json({
@@ -432,19 +455,22 @@ const postController = {
                 where: {
                     userId: authUser.id,
                     postId: postId,
+                    liked: 1
                 },
             });
 
-            // const hasLiked = !!like; // Convert to true/false
-            // console.log(hasLiked); return false;
-            if (like.length === 0) {
+            const hasLiked = !!like; // Convert to true/false
+            // console.log(like); return false;
+            if (!hasLiked) {
                 return res.status(404).json({
                     success: false,
+                    data : hasLiked,
                     message: 'You not like on this post.!'
                 });
             }
             return res.status(201).json({
                 success: true,
+                data : hasLiked,
                 message: 'You already like on this post.!'
             })
         } catch (error) {
