@@ -76,7 +76,7 @@ const postController = {
             const newPost = {
                 title: req.body.title,
                 content: req.body.content,
-                userId: authUser.id
+                UserId: authUser.id
             };
             let data = await Post.create(newPost);
             return res.status(201).json({
