@@ -1,6 +1,6 @@
 import jwt  from 'jsonwebtoken';
 
-const logingUser = (req, res) => {
+const authenticateUser = (req, res) => {
     if (req.headers && req.headers["authorization"]) {
         let token = req.headers["authorization"].split(' ')[1],
             decoded;
@@ -18,4 +18,4 @@ const logingUser = (req, res) => {
     return res.send(500);
 };
 
-export {logingUser}
+export {authenticateUser}

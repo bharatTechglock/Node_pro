@@ -26,6 +26,15 @@ const createUser = [
         max: 10
     })
 ]
+
+const loginUser = [
+    check('email', 'Email is required').not().isEmpty(),
+    check('password', 'Password is required').not().isEmpty(),
+    check('email', 'Please enter valid email.')
+    .isEmail({
+        emailRegexp,
+    }),
+]
 const createComment = [
 
     check('content', 'Content is required').not().isEmpty(),
@@ -50,4 +59,4 @@ const getLike = [
 ]
 
 
-export  {createUser,createComment,createLike,createPostValidation,getLike}
+export  {createUser,loginUser,createComment,createLike,createPostValidation,getLike}

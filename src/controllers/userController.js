@@ -7,130 +7,126 @@ import {
 import {
     validationResult
 } from 'express-validator';
-/**
- * @description Create New User
- * @type POST
- * @path /api/users/
- * @param {*} req
- * @param {*} res
- * @returns JSON
- */
-const registerUser = async (req, res) => {
-    try {
-        // console.log(req.body); return false;
-        const {
-            first_name,
-            last_name,
-            email,
-            password
-        } = req.body;
-        //validation
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array()
-            });
-        }
+const userController = {
+    /**
+     * @description Create New User
+     * @type POST
+     * @path /api/users/
+     * @param {*} req
+     * @param {*} res
+     * @returns JSON
+     */
+    registerUser: async (req, res) => {
+        try {
+            // console.log(req.body); return false;
+            const {
+                first_name,
+                last_name,
+                email,
+                password
+            } = req.body;
+            //validation
 
-        // Check if the email already exists in the database
-        const existingUser = await User.findOne({
-            where: {
-                email
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    errors: errors.array()
+                });
             }
-        });
-        // console.log(existingUser); return false;
 
-        if (existingUser) {
-            return res.status(400).json({
+            // Check if the email already exists in the database
+            const existingUser = await User.findOne({
+                where: {
+                    email
+                }
+            });
+            // console.log(existingUser); return false;
+
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Email already exists'
+                });
+            }
+            const salt = await bcrypt.genSalt(10);
+            const hashPassword = await bcrypt.hash(req.body.password, salt)
+            // console.log(req.body); return false;
+            const newUser = {
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                email: req.body.email,
+                password: hashPassword
+            };
+            let data = await User.create(newUser);
+            if (data) {
+                data.created_by = data.id;
+                await data.save();
+            }
+            return res.status(201).json({
+                success: true,
+                data: data,
+                message: 'User registered!.'
+            })
+        } catch (error) {
+            return res.status(500).json({
                 success: false,
-                error: 'Email already exists'
+                error: error,
+                message: error.message
             });
         }
-        const salt = await bcrypt.genSalt(10);
-        const hashPassword = await bcrypt.hash(req.body.password, salt)
-        // console.log(req.body); return false;
-        const newUser = {
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            email: req.body.email,
-            password: hashPassword
-        };
-        let data = await User.create(newUser);
-        if (data) {
-            data.created_by = data.id;
-            await data.save();
-        }
-        return res.status(201).json({
-            success: true,
-            data: data,
-            message: 'User registered!.'
-        })
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: error,
-            message: error.message
-        });
-    }
-}
+    },
 
-/**
- * @description Login user
- * @param {*} req email,password
- * @param {*} res generate auth and login user
- * @returns 
- */
-const userLogin = async (req, res) => {
-    try {
-        // Find the user by ID
-        let email = req.body.email;
-        let password = req.body.password;
-        // Check if req.body is null or empty
-        if (!email || !password) {
-            return res.status(400).json({
-                error: 'Email and password are required!'
-            });
-        }
-
-        const findUser = await User.findOne({
-            where: {
-                email
+    /**
+     * @description Login user
+     * @param {*} req email,password
+     * @param {*} res generate auth and login user
+     * @returns 
+     */
+    userLogin: async (req, res) => {
+        try {
+            // Find the user by ID
+            let email = req.body.email;
+            let password = req.body.password;
+            // Check if req.body is null or empty
+            if (!email || !password) {
+                return res.status(400).json({
+                    error: 'Email and password are required!'
+                });
             }
-        });
-        // console.log(findUser); return false;
-        if (findUser) {
-            const match = await bcrypt.compare(password, findUser.password);
-            if (match) {
-                // Generate an authentication token
 
-                // const authToken = util.generateAuthToken(findUser);
-                const authToken = generateAuthToken(findUser);
-
-                return res.status(201).json({
-                    success: true,
-                    data: {
-                        auth_token: `Bearer_ ${authToken}`
-                    },
-                    message: 'Logged in successfully!'
-                })
+            const findUser = await User.findOne({
+                where: {
+                    email
+                }
+            });
+            // console.log(findUser); return false;
+            if (findUser) {
+                const match = await bcrypt.compare(password, findUser.password);
+                if (match) {
+                    const authToken = generateAuthToken(findUser);
+                    return res.status(201).json({
+                        success: true,
+                        data: {
+                            auth_token: `Bearer_ ${authToken}`
+                        },
+                        message: 'Logged in successfully!'
+                    });
+                } else {
+                    return res.status(401).send('Incorrect password');
+                }
             } else {
-                res.status(401).send('Incorrect password');
+                return res.status(400).json({
+                    error: 'Email or user is not exists!'
+                });
             }
-        } else {
-            return res.status(400).json({
-                error: 'Email or user is not exists!'
+        } catch (error) {
+            return res.status(500).json({
+                success: false,
+                message: error.message
             });
         }
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: error.message
-        });
     }
-}
+};
 
-export {
-    registerUser,
-    userLogin
-}
+export default userController;
