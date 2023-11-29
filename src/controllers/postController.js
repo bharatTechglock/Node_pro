@@ -433,21 +433,18 @@ const postController = {
                 },
             });
 
-            const hasLiked = !!like; // Convert to true/false
-
-            if (!hasLiked) {
+            // const hasLiked = !!like; // Convert to true/false
+            // console.log(hasLiked); return false;
+            if (like.length === 0) {
                 return res.status(404).json({
                     success: false,
-                    data: hasLiked,
                     message: 'You not like on this post.!'
                 });
-            } else {
-                return res.status(201).json({
-                    success: true,
-                    data: hasLiked,
-                    message: 'You already like on this post.!'
-                })
             }
+            return res.status(201).json({
+                success: true,
+                message: 'You already like on this post.!'
+            })
         } catch (error) {
             return res.status(500).json({
                 success: false,
