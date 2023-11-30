@@ -1,6 +1,6 @@
 import userController from "../controllers/userController.js";
 import express from "express";
-import authMiddleware from "../middlewares/authMiddleware.js";
+import userAuth from '../middlewares/authMiddleware.js';
 import {createUser,loginUser} from "../utils/validation.js";
 
 const router = express.Router();
@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/', createUser,userController.registerUser);
 
 router.post('/login-user',loginUser,userController.userLogin);
+router.post('/user-logout',userAuth,userController.logout);
 
 
 export default router;

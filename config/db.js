@@ -17,18 +17,27 @@ const sequelize = new Sequelize('Node_Pro_Test', 'root', '', {
     }
 });
 
+// sequelize.sync({
+//     force: false
+// }).then(() => {
+//     console.log('Database synced');
+// });
 
-// Establish the connection only once
-async function testConnection() {
+const testConnection = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
+        console.log('Database connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }
-}
+};
 
-// console.log(testConnection());
+// Close the connection when the Node.js process exits
+process.on('exit', () => {
+    console.log('Closing database connection.');
+    sequelize.close();
+});
+
 export {
     sequelize,
     testConnection

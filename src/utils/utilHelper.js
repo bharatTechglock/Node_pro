@@ -11,6 +11,21 @@ import jwt from 'jsonwebtoken';
  * @param {*} user
  * @returns {*}
  */
+// const generateAuthToken = (user) => {
+//     const payload = {
+//         id: user.id,
+//         email: user.email,
+//         role: user.user_type,
+//         name: user.name,
+//     };
+//     const secret_key = secretKey;
+//     const options = {
+//         expiresIn: '10h',
+//     };
+//     return jwt.sign(payload, secret_key, options);
+// }
+const tokenBlacklist = [];
+
 const generateAuthToken = (user) => {
     const payload = {
         id: user.id,
@@ -18,13 +33,27 @@ const generateAuthToken = (user) => {
         role: user.user_type,
         name: user.name,
     };
-    const secret_key = secretKey;
+    const secret_key = 'bharat-kumar'; // Make sure to replace with your actual secret key
     const options = {
-        expiresIn: '10h',
+        expiresIn: '30m',
     };
-    return jwt.sign(payload, secret_key, options);
+
+    // Check if the user has an existing token in the blacklist
+    const index = tokenBlacklist.findIndex((blacklistedToken) => blacklistedToken === user.id);
+    if (index !== -1) {
+        // Token found in the blacklist, remove it
+        tokenBlacklist.splice(index, 1);
+    }
+    // Generate a new token
+    const newToken = jwt.sign(payload, secret_key, options);
+    // Store the user's ID in the blacklist
+    tokenBlacklist.push(user.id);
+
+    return newToken;
 }
 
 
 
-export  {generateAuthToken}
+export {
+    generateAuthToken
+}
