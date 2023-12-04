@@ -1,41 +1,38 @@
 import jwt from 'jsonwebtoken';
-const blacklist = new Set();
-import User from '../models/User.js';
+import {redisClient,field} from '../utils/redisConnection.js';
 
 /**
  * @DESC Verify JWT from authorization header Middleware
  */
-const userAuth = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) {
-        return res.status(403).json({
-            success: false,
-            message: 'Do not have permission for this!, Please add token in header.'
-        });
-    }
-    const token = authHeader.split(" ")[1];
-    const findUser = User.findOne({
-        where: {
-            refresh_tokens: token
-        }
-    })
-    // const hasUser = !!findUser; // convert true or false
-    console.log(findUser.refresh_tokens);
-    if(findUser.refresh_tokens === null){
-        return res.status(403).json({
-            success: false,
-            message: 'Currently you logout. Please login and use token.'
-        });
-    }
-    jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
-        if (err) {
-            return res.status(403).json({
-                success: false,
-                error: err,
-                message: err.message
+const userAuth = async(req, res, next) => {
+    try {
+        if (req.headers && req.headers["authorization"]) {
+            const token = req.headers["authorization"].split(' ')[1];
+            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            const key = `user:${decoded.id}:token`;
+            // Assuming you have a redisClient with a properly defined hGet method
+            const storedToken = await redisClient.hGet(field, key);
+            // console.log(storedToken); return false;
+            if (!storedToken || storedToken !== token) {
+                return res.status(401).json({
+                    message: 'Unauthorized - User logged out'
+                });
+            }
+            // You can attach the decoded user information to the request object for later use
+            req.user = decoded;
+            // Proceed to the next middleware or route handler
+            return next();
+        } else {
+            return res.status(401).json({
+                message: 'Unauthorized - Token not provided'
             });
         }
-        next();
-    });
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error'
+        });
+    }
 };
 export default userAuth;

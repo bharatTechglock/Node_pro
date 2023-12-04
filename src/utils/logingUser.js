@@ -6,7 +6,6 @@ const authenticateUser = (req, res) => {
             decoded;
         try {
             decoded = jwt.verify(token, process.env.SECRET_KEY);
-            // console.log('heje',decoded);
             return decoded;
         } catch (e) {
             res.status(500).json({

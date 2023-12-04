@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 import {
-    generateAuthToken
+    utilHelper
 } from '../utils/utilHelper.js';
 import {
     authenticateUser
@@ -9,7 +9,6 @@ import {
 import {
     validationResult
 } from 'express-validator';
-import jwt from 'jsonwebtoken';
 
 
 const userController = {
@@ -91,25 +90,22 @@ const userController = {
         try {
             const email = req.body.email;
             const password = req.body.password;
-
             if (!email || !password) {
                 return res.status(400).json({
                     error: 'Email and password are required!'
                 });
             }
-
             const findUser = await User.findOne({
                 where: {
                     email
                 }
             });
-
             if (findUser) {
                 const match = await bcrypt.compare(password, findUser.password);
                 if (match) {
-                    const authToken = generateAuthToken(findUser);
-                    findUser.refresh_tokens = authToken;
-                    findUser.save();
+                    const authToken = utilHelper.generateAuthToken(findUser);
+                    // Store the token in Redis
+                    await utilHelper.storeTokenInRedis(findUser.id, authToken);
                     return res.status(200).json({
                         success: true,
                         data: {
@@ -141,49 +137,16 @@ const userController = {
      * @param {*} res 
      */
     logout: async (req, res) => {
-        // try {
-        //      //Get auth user details
-        //      const authUser = authenticateUser(req);
-        //     //  console.log(authUser); return false;
-        //     const userId = authUser.id; 
-        //     const tokenBlacklist = [];
-        //     const index = tokenBlacklist.findIndex((blacklistedToken) => blacklistedToken === userId);
-        //     // console.log(index); return false;
-        //     if (index !== -1) {
-        //         tokenBlacklist.splice(index, 1);
-        //     }
-        //     return res.status(200).json({
-        //         success: true,
-        //         message: 'Logged out successfully!'
-        //     });
-        // } catch (error) {
-        //     console.log(error);
-
-        //     return res.status(500).json({
-        //         success: false,
-        //         error: error,
-        //         message: 'Internal server error'
-        //     });
-        // }
         try {
-            const tokenBlacklist = [];
-            const authToken = req.headers["authorization"].replace('Bearer ', '');
-            // console.log(authToken);
-            const decoded = jwt.verify(authToken, 'bharat-kumar'); // Replace with your actual secret key
-            // Remov the token from users
-            const findUser = await User.findOne({
-                where: {
-                    id: decoded.id
-                }
-            });
-            findUser.refresh_tokens = null;
-            findUser.save();
-            tokenBlacklist.push(decoded.id);
+            const user = authenticateUser(req);
+            if (user) {
+                await utilHelper.removeTokenFromRedis(user.id);
 
-            return res.status(200).json({
-                success: true,
-                message: 'Logged out successfully!'
-            });
+                return res.status(200).json({
+                    success: true,
+                    message: 'Logged out successfully!'
+                });
+            }
         } catch (error) {
             console.log(error);
             return res.status(401).json({

@@ -22,11 +22,7 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         allowNull: false,
         // unique: true,
-    },
-    refresh_tokens: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
+    }
 });
 
 // export { User };
