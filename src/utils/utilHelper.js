@@ -36,7 +36,10 @@ const utilHelper = {
         // Use HSET to store the token in a hash field
         try {
             await redisClient.hSet(field, key, token);
-            await redisClient.expireAt(key, '5m');
+            // await redisClient.hSet(field, key, token).expire(200);
+            // await redisClient.expireAt(key, '5m');
+            // await redisClient.expire(key, 200, 'NX');
+
         } catch (error) {
             console.log(error);
         }

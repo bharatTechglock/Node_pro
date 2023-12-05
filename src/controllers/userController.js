@@ -9,6 +9,8 @@ import {
 import {
     validationResult
 } from 'express-validator';
+import { logoutHandler } from '../middlewares/newmiddl.js';
+import {addToBlacklist} from '../utils/jwtBlacklist.js'
 
 
 const userController = {
@@ -154,7 +156,44 @@ const userController = {
                 message: 'Logout failed'
             });
         }
+    },
+    logouut:async (req, res) => {
+      
+        try {
+            const user = authenticateUser(req);
+            const logouTu = logoutHandler(req);
+            return res.status(200).json({
+                success: true,
+                message: 'Logged out successfully!'
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(401).json({
+                error: error,
+                message: 'Logout failed'
+            });
+        }
+    },
+    logouut2:async (req, res) => {
+      
+        try {
+            const user = authenticateUser(req);
+            // const logouTu = logoutHandler(req);
+            const token = req.headers["authorization"].split(' ')[1];
+            const jwtBlacklist = addToBlacklist(token);
+            return res.status(200).json({
+                success: true,
+                message: 'Logged out successfully!'
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(401).json({
+                error: error,
+                message: 'Logout failed'
+            });
+        }
     }
+
 };
 
 export default userController;
