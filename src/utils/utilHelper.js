@@ -24,7 +24,7 @@ const utilHelper = {
         };
         const secret_key = 'bharat-kumar';
         const options = {
-            expiresIn: '4hour',
+            expiresIn: '5h',
         };
         // Generate a new token
         const newToken = jwt.sign(payload, secret_key, options);
@@ -36,6 +36,7 @@ const utilHelper = {
         // Use HSET to store the token in a hash field
         try {
             await redisClient.hSet(field, key, token);
+            await redisClient.expireAt(key, '5m');
         } catch (error) {
             console.log(error);
         }

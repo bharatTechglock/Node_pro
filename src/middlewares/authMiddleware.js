@@ -13,9 +13,9 @@ const userAuth = async(req, res, next) => {
             // Assuming you have a redisClient with a properly defined hGet method
             const storedToken = await redisClient.hGet(field, key);
             // console.log(storedToken); return false;
-            if (!storedToken || storedToken !== token) {
+            if (storedToken && storedToken === token) {
                 return res.status(401).json({
-                    message: 'Unauthorized - User logged out'
+                    message: 'Unauthorized - User logged out, Please login again!'
                 });
             }
             // You can attach the decoded user information to the request object for later use
@@ -28,10 +28,11 @@ const userAuth = async(req, res, next) => {
             });
         }
     } catch (error) {
-        console.error('Authentication error:', error);
+        // console.error('Authentication error:', error);
         return res.status(500).json({
             success: false,
-            message: 'Internal Server Error'
+            error:error,
+            message: error.message
         });
     }
 };

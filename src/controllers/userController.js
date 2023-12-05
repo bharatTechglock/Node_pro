@@ -104,8 +104,6 @@ const userController = {
                 const match = await bcrypt.compare(password, findUser.password);
                 if (match) {
                     const authToken = utilHelper.generateAuthToken(findUser);
-                    // Store the token in Redis
-                    await utilHelper.storeTokenInRedis(findUser.id, authToken);
                     return res.status(200).json({
                         success: true,
                         data: {
@@ -140,8 +138,10 @@ const userController = {
         try {
             const user = authenticateUser(req);
             if (user) {
-                await utilHelper.removeTokenFromRedis(user.id);
-
+                // Store the token in Redis
+                const token = req.headers["authorization"].split(' ')[1];
+                await utilHelper.storeTokenInRedis(user.id, token);
+                // await utilHelper.removeTokenFromRedis(user.id);
                 return res.status(200).json({
                     success: true,
                     message: 'Logged out successfully!'
