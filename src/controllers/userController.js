@@ -1,4 +1,5 @@
-import User from '../models/User.js';
+// import User from '../models/User.js';
+import {Permission, Role, User} from '../models/index.js'
 import bcrypt from 'bcrypt';
 import {
     utilHelper
@@ -170,7 +171,7 @@ const userController = {
             console.log(error);
             return res.status(401).json({
                 error: error,
-                message: 'Logout failed'
+                message: error.message
             });
         }
     },
@@ -190,6 +191,29 @@ const userController = {
             return res.status(401).json({
                 error: error,
                 message: 'Logout failed'
+            });
+        }
+    },
+    userDetails:async (req, res) => {
+      
+        try {
+            const userDetails = authenticateUser(req);
+            // const logouTu = logoutHandler(req);
+            const user = await User.findByPk(userDetails.id);
+            const adminRole = await Role.findOne({ where: { name: 'Contractor' } });
+
+            const readPermission = await Permission.findOne({ where: { name: 'READ' } });
+            // console.log(hasReadPermission); return false;
+            
+            return res.status(200).json({
+                success: true,
+                message: 'User details get successfully!'
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(401).json({
+                error: error,
+                message: error.message
             });
         }
     }

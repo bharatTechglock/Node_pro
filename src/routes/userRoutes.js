@@ -14,6 +14,7 @@ router.post('/login-user',loginUser,userController.userLogin);
 router.post('/user-logout',userAuth,userController.logout);
 // router.post('/logout',checkTokenBlacklist,userController.logouut);
 router.post('/logout',checkJwtBlacklist,userController.logouut);
+router.get('/user-profile',userAuth,userController.userDetails);
 
 
 export default router;

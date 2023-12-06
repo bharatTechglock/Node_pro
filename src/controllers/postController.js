@@ -5,10 +5,11 @@ import {
     authenticateUser
 } from '../utils/logingUser.js';
 import {
-    User,
     Post,
     Comment,
-    Like
+    Like,
+    Role,
+    Role_has_permission
 } from '../models/index.js';
 const postController = {
     /**
@@ -38,11 +39,22 @@ const postController = {
                     }
                 ],
             });
-
+            const getAllRoles = await Role.findAll({
+                where: {
+                    id:1
+                },
+                include: [{
+                        model: Role_has_permission,
+                        as: 'roleHasPermissions',
+                    }
+                ],
+            });
+            console.log(getAllRoles); 
             return res.status(200).json({
                 success: true,
                 count: allPosts.length,
                 data: allPosts,
+                tara: getAllRoles,
                 message: 'Get all posts for this user successfully!'
             });
         } catch (error) {
@@ -464,13 +476,13 @@ const postController = {
             if (!hasLiked) {
                 return res.status(404).json({
                     success: false,
-                    data : hasLiked,
+                    data: hasLiked,
                     message: 'You not like on this post.!'
                 });
             }
             return res.status(201).json({
                 success: true,
-                data : hasLiked,
+                data: hasLiked,
                 message: 'You already like on this post.!'
             })
         } catch (error) {
