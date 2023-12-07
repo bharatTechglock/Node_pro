@@ -2,7 +2,9 @@
 import {
     DataTypes
 } from 'sequelize';
-import {sequelize} from '../../config/db.js';
+import {
+    sequelize
+} from '../../config/db.js';
 
 const User = sequelize.define('User', {
     first_name: {
@@ -24,6 +26,7 @@ const User = sequelize.define('User', {
         // unique: true,
     }
 });
+
 
 // export { User };
 // User.sync({ alter: true })

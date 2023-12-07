@@ -10,8 +10,14 @@ module.exports = {
         updatedAt: new Date()
       },
       {
-        role_id: 2,
+        role_id: 1,
         permission_id: 2,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      },
+      {
+        role_id: 1,
+        permission_id: 3,
         createdAt: new Date(),
         updatedAt: new Date()
       },

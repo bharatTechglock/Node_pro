@@ -195,18 +195,16 @@ const userController = {
         }
     },
     userDetails:async (req, res) => {
-      
         try {
             const userDetails = authenticateUser(req);
             // const logouTu = logoutHandler(req);
-            const user = await User.findByPk(userDetails.id);
-            const adminRole = await Role.findOne({ where: { name: 'Contractor' } });
-
-            const readPermission = await Permission.findOne({ where: { name: 'READ' } });
-            // console.log(hasReadPermission); return false;
-            
+            // console.log(req.body.userId); return false
+            const user_id = req.body.userId;
+            const user = await User.findByPk(user_id);
+          
             return res.status(200).json({
                 success: true,
+                data:user,
                 message: 'User details get successfully!'
             });
         } catch (error) {

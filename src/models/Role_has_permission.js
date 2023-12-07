@@ -2,18 +2,28 @@
 import {
     DataTypes
 } from 'sequelize';
-import {sequelize} from '../../config/db.js';
+import {
+    sequelize
+} from '../../config/db.js';
 
+// Role_has_permission model definition
 const Role_has_permission = sequelize.define('Role_has_permission', {
-    permission_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
     role_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    }
-});
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    permission_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    // user_id: {
+    //   type: DataTypes.INTEGER,
+    //   defaultValue: 1,
+    //   allowNull: true, 
+    // },
+    // other fields...
+  });
+  
 
 // export {
 //     Role_has_permission
