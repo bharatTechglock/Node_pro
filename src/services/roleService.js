@@ -4,8 +4,6 @@ import {
 } from "../models/index.js";
 
 const findRoleByName = async (roleName) => {
-    // console.log( 'sdss',roleNames); return false;
-
     try {
         const role = await Role.findOne({
             where: {
@@ -18,7 +16,21 @@ const findRoleByName = async (roleName) => {
         throw error;
     }
 };
+const findPermissionByName = async (permissionName) => {
+    try {
+        const permission = await Permission.findOne({
+            where: {
+                name: permissionName
+            }
+        });
+        return permission;
+    } catch (error) {
+        console.error(`Error finding permission by name '${permissionName}':`, error);
+        throw error;
+    }
+};
 
 export {
-    findRoleByName
+    findRoleByName,
+    findPermissionByName
 };

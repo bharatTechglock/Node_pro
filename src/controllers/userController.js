@@ -1,5 +1,7 @@
 // import User from '../models/User.js';
-import {Permission, Role, User} from '../models/index.js'
+import {
+    User
+} from '../models/index.js'
 import bcrypt from 'bcrypt';
 import {
     utilHelper
@@ -10,8 +12,16 @@ import {
 import {
     validationResult
 } from 'express-validator';
-import { logoutHandler } from '../middlewares/newmiddl.js';
-import {addToBlacklist} from '../utils/jwtBlacklist.js'
+import {
+    logoutHandler
+} from '../middlewares/newmiddl.js';
+import {
+    addToBlacklist
+} from '../utils/jwtBlacklist.js'
+import {
+    checkPermission
+} from '../services/checkPermission.js';
+import { RoleConstant,PermissionConstant } from '../utils/constants.js';
 
 
 const userController = {
@@ -158,8 +168,8 @@ const userController = {
             });
         }
     },
-    logouut:async (req, res) => {
-      
+    logouut: async (req, res) => {
+
         try {
             const user = authenticateUser(req);
             const logouTu = logoutHandler(req);
@@ -175,8 +185,8 @@ const userController = {
             });
         }
     },
-    logouut2:async (req, res) => {
-      
+    logouut2: async (req, res) => {
+
         try {
             const user = authenticateUser(req);
             // const logouTu = logoutHandler(req);
@@ -194,17 +204,19 @@ const userController = {
             });
         }
     },
-    userDetails:async (req, res) => {
+    userDetails: async (req, res) => {
         try {
-            const userDetails = authenticateUser(req);
-            // const logouTu = logoutHandler(req);
-            // console.log(req.body.userId); return false
+            const authUser = authenticateUser(req);
+           //Check Read permission
+            const hasPermission = await checkPermission(RoleConstant.CONTRACTOR,PermissionConstant.READ);
+            if (!hasPermission) {
+                throw new Error('Unauthorized: User does not have permission to fetch user details');
+            }
             const user_id = req.body.userId;
             const user = await User.findByPk(user_id);
-          
             return res.status(200).json({
                 success: true,
-                data:user,
+                data: user,
                 message: 'User details get successfully!'
             });
         } catch (error) {

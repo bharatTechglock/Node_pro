@@ -75,22 +75,6 @@ const rolePermissions = (models) => {
     });
 };
 
-// Export all models
-// Extend the User model with the hasPermission method
-User.prototype.hasPermission = async function(permissionName) {
-    // Check if the user has a role that has the specified permission
-    const roles = await Role.findAll({ include: 'permissions' });
-//   console.log(permissionName); return false;
-    for (const role of roles) {
-      const permissions = role.permissions.map(permission => permission.name);
-    //   console.log(permissions); return false;
-      if (permissions.includes(permissionName)) {
-        return true;
-      }
-    }
-  
-    return false;
-  };
 // Export all models and associations
 userPosts({
     User,

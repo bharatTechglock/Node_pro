@@ -18,15 +18,14 @@ const Role_has_permission = sequelize.define('Role_has_permission', {
     },
     // user_id: {
     //   type: DataTypes.INTEGER,
-    //   defaultValue: 1,
+    //   defaultValue: 2,
     //   allowNull: true, 
     // },
-    // other fields...
   });
   
 
 // export {
 //     Role_has_permission
 // };
-// Role_has_permission.sync({ force: true });
+// Role_has_permission.sync({ alter: true });
 export default Role_has_permission;

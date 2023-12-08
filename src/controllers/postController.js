@@ -7,10 +7,10 @@ import {
 import {
     Post,
     Comment,
-    Like,
-    Role,
-    Role_has_permission
+    Like
 } from '../models/index.js';
+import { checkPermission } from '../services/checkPermission.js';
+import { PermissionConstant, RoleConstant } from '../utils/constants.js';
 const postController = {
     /**
      * @description Get All Posts with likes and comments for login user
@@ -24,6 +24,11 @@ const postController = {
         try {
             //Get auth user details
             const authUser = authenticateUser(req);
+            const hasPermission = await checkPermission(RoleConstant.CONTRACTOR,PermissionConstant.READ);
+            // console.log(hasPermission); return false;
+            if (!hasPermission) {
+                throw new Error('Unauthorized: User does not have permission to fetch user details');
+            }
             // Fetch all posts with associated comments and likes
             const allPosts = await Post.findAll({
                 where: {
@@ -39,22 +44,10 @@ const postController = {
                     }
                 ],
             });
-            const getAllRoles = await Role.findAll({
-                where: {
-                    id:1
-                },
-                include: [{
-                        model: Role_has_permission,
-                        as: 'roleHasPermissions',
-                    }
-                ],
-            });
-            console.log(getAllRoles); 
             return res.status(200).json({
                 success: true,
                 count: allPosts.length,
                 data: allPosts,
-                tara: getAllRoles,
                 message: 'Get all posts for this user successfully!'
             });
         } catch (error) {
@@ -234,6 +227,11 @@ const postController = {
     getLikesOnPost: async (req, res) => {
         try {
             const authUser = authenticateUser(req);
+            const hasPermission = await checkPermission(RoleConstant.CONTRACTOR,PermissionConstant.READ);
+            // console.log(hasPermission); return false;
+            if (!hasPermission) {
+                throw new Error('Unauthorized: User does not have permission to fetch user details');
+            }
             const postId = req.body.postId;
             // console.log(postId); return false;
             if (!postId) {
@@ -283,9 +281,12 @@ const postController = {
     getAllLikesOnPost: async (req, res) => {
         try {
             const authUser = authenticateUser(req);
+            const hasPermission = await checkPermission(RoleConstant.CONTRACTOR,PermissionConstant.READ);
+            // console.log(hasPermission); return false;
+            if (!hasPermission) {
+                throw new Error('Unauthorized: User does not have permission to fetch user details');
+            }
             const postId = req.body.postId;
-            // console.log(postId); return false;
-
             if (!postId) {
                 return res.status(400).json({
                     error: 'postId is required'
@@ -470,9 +471,7 @@ const postController = {
                     liked: 1
                 },
             });
-
-            const hasLiked = !!like; // Convert to true/false
-            // console.log(like); return false;
+            const hasLiked = !!like; 
             if (!hasLiked) {
                 return res.status(404).json({
                     success: false,
@@ -493,6 +492,5 @@ const postController = {
             });
         }
     },
-
 };
 export default postController;

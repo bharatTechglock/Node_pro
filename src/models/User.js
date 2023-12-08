@@ -20,10 +20,15 @@ const User = sequelize.define('User', {
         allowNull: false,
         unique: true,
     },
+    user_type: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 2,
+        // unique: true,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        // unique: true,
     }
 });
 
